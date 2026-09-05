@@ -1,4 +1,265 @@
-.App {
-  font-family: sans-serif;
-  text-align: center;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f6f5;
+  color: #1c1c1c;
+}
+
+.app {
+  font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.app-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  color: #495057;
+}
+
+.banner {
+  background: #fff3bf;
+  border: 1px solid #f5c400;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e3e6e4;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.panel h2 {
+  font-size: 1rem;
+  margin: 0 0 10px;
+}
+
+.controls section + section {
+  margin-top: 20px;
+}
+
+.phase-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.phase-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.phase-btn.active {
+  background: #1c3d2e;
+  color: #fff;
+  border-color: #1c3d2e;
+}
+
+.phase-lambda {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.add-btn {
+  border: 1px solid #2f9e44;
+  color: #2f9e44;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.event-table th {
+  text-align: left;
+  color: #868e96;
+  font-weight: 500;
+  padding-bottom: 4px;
+}
+
+.event-table td {
+  padding: 2px 2px;
+}
+
+.event-table input {
+  width: 100%;
+  padding: 3px 4px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.78rem;
+}
+
+.remove-btn {
+  border: none;
+  background: none;
+  color: #e03131;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.swatch-none {
+  background: #adb5bd;
+}
+
+.map-panel h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #868e96;
+}
+
+.leaflet-map {
+  width: 100%;
+  height: 520px;
+  border-radius: 8px;
+  border: 1px solid #e3e6e4;
+}
+
+.detail-body h3 {
+  margin: 0 0 10px;
+}
+
+.detail-body dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  font-size: 0.85rem;
+  margin: 0 0 14px;
+}
+
+.detail-body dt {
+  color: #868e96;
+}
+
+.detail-body dd {
+  margin: 0;
+}
+
+.rsi-breakdown {
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px dashed #dee2e6;
+  padding-top: 10px;
+}
+
+.quintile-tag {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.8rem;
+  width: fit-content;
+}
+
+.quintile-tag.none {
+  background: #adb5bd;
+}
+
+.empty-hint {
+  color: #868e96;
+  font-size: 0.85rem;
+}
+
+.app-footer {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #e3e6e4;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+@media (max-width: 700px) {
+  .app-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-col h3 {
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+}
+
+.footer-col ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #495057;
 }
