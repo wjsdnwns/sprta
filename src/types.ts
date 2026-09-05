@@ -9,8 +9,9 @@ export type Terrain = "응달저지대" | "평지" | "경사배수양호";
 export type Phase = "12월" | "1-2월" | "3월" | "4월이후";
 
 /**
- * 가로수 구간. x/y는 실제 위경도가 아니라 지도 상 배치를 위한 개략(0~100) 좌표다.
- * 실제 서비스 전에는 OA-22904(서울시 가로수 위치정보)의 위경도로 교체해야 한다.
+ * 가로수 구간. lat/lng은 해당 도로의 실제 위치 근처 대표 좌표(근사치)이며,
+ * OA-22904(서울시 가로수 위치정보)의 실측 가로수 좌표가 아니다.
+ * 실제 서비스 전에는 도로 전체가 아닌 개별 가로수/구간 단위 좌표로 교체해야 한다.
  */
 export interface Segment {
   id: string;
@@ -21,8 +22,8 @@ export interface Segment {
   terrain: Terrain;
   treeCount: number;
   lengthM: number;
-  x: number;
-  y: number;
+  lat: number;
+  lng: number;
 }
 
 /**

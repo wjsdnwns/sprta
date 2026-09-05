@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import MapView from "./MapView";
 import { SAMPLE_EVENTS, SAMPLE_SEGMENTS } from "./sampleData";
 import { evaluateSegments, PHASE_LAMBDA, QUINTILE_COLORS, QUINTILE_LABELS } from "./rsiModel";
 import { Phase, SnowEvent } from "./types";
@@ -143,44 +144,9 @@ function App() {
 
         <section className="panel map-panel">
           <h2>
-            18개 구간 개략도 <span className="hint">(실제 위치 아님 — 배치용 예시 좌표)</span>
+            실제 지도 <span className="hint">(OpenStreetMap · 구간 좌표는 도로 대표 지점 근사치)</span>
           </h2>
-          <svg viewBox="0 0 100 100" className="map-svg" role="img" aria-label="가로수 구간 개략도">
-            <rect x={0} y={0} width={100} height={100} rx={2} className="map-bg" />
-            <line x1={2} y1={2} x2={95} y2={92} className="watershed-line" />
-            <text x={4} y={6} className="gu-label">
-              은평구 (북서 산지)
-            </text>
-            <text x={38} y={30} className="gu-label">
-              서대문구
-            </text>
-            <text x={62} y={54} className="gu-label">
-              마포구 (남동 한강)
-            </text>
-            {results.map((r) => {
-              const radius = 1.4 + Math.sqrt(r.segment.treeCount) * 0.15;
-              const color = r.quintile ? QUINTILE_COLORS[r.quintile] : "#adb5bd";
-              const isSelected = r.segment.id === selectedId;
-              return (
-                <g key={r.segment.id}>
-                  <circle
-                    cx={r.segment.x}
-                    cy={r.segment.y}
-                    r={radius}
-                    fill={color}
-                    stroke={isSelected ? "#1c1c1c" : "#ffffff"}
-                    strokeWidth={isSelected ? 0.8 : 0.4}
-                    className="segment-dot"
-                    onClick={() => setSelectedId(r.segment.id)}
-                  >
-                    <title>
-                      {r.segment.gu} {r.segment.roadName}
-                    </title>
-                  </circle>
-                </g>
-              );
-            })}
-          </svg>
+          <MapView results={results} selectedId={selectedId} onSelect={setSelectedId} />
         </section>
 
         <aside className="panel detail-panel">

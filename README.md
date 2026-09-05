@@ -15,7 +15,8 @@ yarn start
 - `src/types.ts` — 구간(Segment)·강설 이벤트(SnowEvent)·계산 결과 타입
 - `src/rsiModel.ts` — RSI(Road-salt Stress Index) 계산 로직. 상수마다 출처 또는 `[잠정]` 표시 주석 포함
 - `src/sampleData.ts` — 18개 예시 구간(은평 6·서대문 6·마포 6) + 예시 강설 기록 4건
-- `src/App.tsx` — 지도(SVG 개략도)·강설 기록 편집·발현 시점 전환·구간 상세 UI
+- `src/MapView.tsx` — Leaflet + OpenStreetMap 기반 실제 지도, 구간별 원형 마커(색상=5분위, 크기=수량)
+- `src/App.tsx` — 지도·강설 기록 편집·발현 시점 전환·구간 상세 UI
 
 ## 모델 요약
 
@@ -28,7 +29,8 @@ yarn start
 
 ## 지금 상태: 프로토타입 (예시 데이터)
 
-`src/sampleData.ts`의 좌표·강설기록과 `src/rsiModel.ts`의 β·λ·도로등급/지형 계수는
+지도 자체는 실제 OpenStreetMap이고 구간 마커도 실제 도로 위치 근처(근사 좌표)에 찍혀 있지만,
+`src/sampleData.ts`의 강설기록과 `src/rsiModel.ts`의 β·λ·도로등급/지형 계수는
 **전부 예시(placeholder) 값**이며, 그래야 하는 이유는 코드 주석에 각각 적어 두었다.
 egress 정책상 이 환경에서는 아래 출처들을 직접 내려받을 수 없으므로, 실제 데이터 확보는
 별도로 진행한 뒤 아래 파일만 교체하면 된다.
@@ -38,7 +40,7 @@ egress 정책상 이 환경에서는 아래 출처들을 직접 내려받을 수
 | 항목 | 현재 | 교체 대상 | 반영 파일 |
 |---|---|---|---|
 | 강설 기록 | 예시 4건 | ASOS 서울(108) 2025-12~2026-02 일자료 | `src/sampleData.ts` (`SAMPLE_EVENTS`) |
-| 구간 좌표·수종·수량 | 예시 18건 | 서울시 가로수 위치정보 (OA-22904) | `src/sampleData.ts` (`SAMPLE_SEGMENTS`) |
+| 구간 좌표·수종·수량 | 도로 대표 지점 근사 좌표 18건 | 서울시 가로수 위치정보 (OA-22904) — 개별 가로수 실측 좌표 | `src/sampleData.ts` (`SAMPLE_SEGMENTS`) |
 | 도로종류·길이 | 예시값 | 은평구/전국 가로수길 정보 (data.go.kr) | `src/sampleData.ts` |
 | β, λ, 도로등급/지형 계수 | 잠정값 | 문헌 확정치 또는 실측 보정 | `src/rsiModel.ts` |
 | 제설함 근접도 D_i | 미적용(1.0) | 서울시 제설함 위치정보 (OA-22648) | `src/rsiModel.ts` |

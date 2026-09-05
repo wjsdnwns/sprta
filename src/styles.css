@@ -179,34 +179,11 @@ body {
   color: #868e96;
 }
 
-.map-svg {
+.leaflet-map {
   width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
-}
-
-.map-bg {
-  fill: #eef3ee;
-}
-
-.watershed-line {
-  stroke: #ced4da;
-  stroke-width: 0.6;
-  stroke-dasharray: 2 1.5;
-}
-
-.gu-label {
-  font-size: 3.4px;
-  fill: #495057;
-}
-
-.segment-dot {
-  cursor: pointer;
-  transition: r 0.15s ease;
-}
-
-.segment-dot:hover {
-  filter: brightness(1.1);
+  height: 520px;
+  border-radius: 8px;
+  border: 1px solid #e3e6e4;
 }
 
 .detail-body h3 {
