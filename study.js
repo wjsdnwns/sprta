@@ -30,10 +30,20 @@ const IC = {
 const ic = (n, cls = '') => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 
 /* ── 기록 (이 기기에만) ── */
+// 로그인하면 상상모의고사K 계정(drafts/{uid} 문서의 study_eng2_l34 칸)에 저장 — 보안 규칙상 본인만 읽고 쓸 수 있어요.
+// 상상모의고사K는 drafts 문서에서 시험 id 칸만 merge로 고치므로 이 칸과 겹치지 않아요.
 const KEY = 'sk-study:eng2-l34:v1';
-const P0 = { tab: 3, read: {}, sent: {}, abc: {}, word: {}, ins: {}, last: '' };
-let PR = (() => { try { return Object.assign({}, P0, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { return Object.assign({}, P0); } })();
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(PR)); } catch (e) { /* 저장 불가(사생활 보호 모드 등) — 화면은 그대로 동작 */ } };
+const FIELD = 'study_eng2_l34';
+const P0 = () => ({ tab: 3, read: {}, sent: {}, abc: {}, word: {}, ins: {}, last: '', updatedAt: 0 });
+const lsKey = uid => uid ? KEY + ':' + uid : KEY;
+const loadLocal = uid => { try { return Object.assign(P0(), JSON.parse(localStorage.getItem(lsKey(uid)) || '{}')); } catch (e) { return P0(); } };
+let PR = loadLocal(null);
+const A = { st: 'loading', uid: null, email: '', nick: '', db: null, ready: false, t: 0, saved: 0, err: '' };
+const save = () => {
+  PR.updatedAt = Date.now();
+  try { localStorage.setItem(lsKey(A.uid), JSON.stringify(PR)); } catch (e) { /* 저장 불가(사생활 보호 모드 등) — 화면은 그대로 동작 */ }
+  if (A.uid && A.ready) { clearTimeout(A.t); A.t = setTimeout(push, 1200); }
+};
 const addTo = (bucket, pid, i) => { const l = PR[bucket][pid] || (PR[bucket][pid] = []); if (!l.includes(i)) l.push(i); save(); };
 const insTotal = P => P.s.length - 1;
 const insDone = P => (PR.ins[P.id] || []).length;
@@ -97,6 +107,7 @@ function headHTML() {
   const gi = (v, label, sub) => `<a class="gnb-i" href="#${v === 'home' ? 'home' : `${v}-${pid}`}" aria-current="${S.view === v}">${label}${sub ? `<small>${sub}</small>` : ''}</a>`;
   return `<header class="top"><div class="in top-in">
     <a class="logo" href="${esc(HOME)}"><b>상상모의고사<i>K</i></b><span>영어2 본문 학습</span></a>
+    ${acctHTML()}
     <nav class="top-r" aria-label="사이트"><a href="${esc(HOME)}">모의고사 홈</a><a href="${esc(HOME)}cut.html">등급컷</a></nav>
   </div></header>
   <nav class="gnb" aria-label="학습 메뉴"><div class="in gnb-in">
@@ -146,6 +157,8 @@ function homeHTML() {
       <a class="step" role="listitem" href="#insert-${nP.id}"><span class="step-n">3</span><b>삽입</b><span>빠진 문장을 끌어다 제자리에 넣어요. 지시어가 무엇을 받는지 확인해요.</span></a>
     </div>
     <div class="resume"><p>${last ? `최근 학습: <b>${MODES[last[1]]} · ${last[2]} ${esc(PB[last[2]].ko)}</b>` : '처음이라면 3과 첫 지문의 첫단추부터 시작하세요.'}<br>다음 추천: <b>${MODES[nv]} · ${nP.id} ${esc(nP.ko)}</b></p><a class="btn primary" href="#${nv}-${nP.id}">이어서 하기 ${ic('arrow')}</a></div>
+    ${A.st === 'out' ? `<div class="acct-note"><p><b>로그인하면 학습 기록이 상상모의고사K 계정에 저장돼요.</b><br>휴대폰과 컴퓨터 어디서든 이어서 할 수 있어요. 지금까지 이 기기에서 한 기록도 함께 옮겨져요.</p><button class="btn primary" data-act="login">Google 계정으로 로그인</button></div>` : ''}
+    ${A.st === 'in' ? `<p class="acct-ok">${ic('check')}<span><b>${esc(A.nick || A.email.split('@')[0])}</b>님의 상상모의고사K 계정에 학습 기록을 저장하고 있어요.</span></p>` : ''}
     <section class="sec" aria-labelledby="h-list">
       <div class="sec-h"><h2 id="h-list">지문별 학습</h2><span class="muted">${esc(L.reading)}</span></div>
       <div class="ltabs" role="tablist">${LESSONS.map(x => `<button class="ltab" role="tab" aria-selected="${x.no === L.no}" data-act="tab" data-n="${x.no}">Lesson ${x.no}<small>${esc(x.title)} · ${esc(x.ko)}</small></button>`).join('')}</div>
@@ -508,6 +521,8 @@ app.addEventListener('click', e => {
   const a = t.dataset.act, P = PB[S.pid], G = S.G;
   switch (a) {
     case 'tab': PR.tab = +t.dataset.n; save(); render(); break;
+    case 'login': login(); break;
+    case 'logout': if (window.firebase && firebase.auth) { push(); firebase.auth().signOut(); } break;
     case 'lnbl': { const L = LESSONS.find(x => x.no === +t.dataset.n); go(S.view, L.passages[0].id); break; }
     case 'vw': { const on = t.hasAttribute('data-open'); app.querySelectorAll('.vw[data-open]').forEach(v => v.removeAttribute('data-open')); if (!on) t.setAttribute('data-open', ''); break; }
     case 'rmode': S.readMode = t.dataset.m; S.rev = new Set(); render(); break;
@@ -570,6 +585,80 @@ app.addEventListener('click', e => {
   }
 });
 
+/* ── 계정 연결 ── */
+function acctHTML() {
+  const who = esc(A.nick || A.email.split('@')[0]);
+  let h;
+  if (A.st === 'in') h = `<span class="acct-dot${A.err ? ' bad' : ''}" aria-hidden="true"></span><span class="acct-who"><b>${who}</b>님 · ${A.err ? esc(A.err) : A.saved ? '계정에 저장됨' : '계정 연결됨'}</span><button class="acct-btn" data-act="logout">로그아웃</button>`;
+  else if (A.st === 'out') h = `<span class="acct-who">${A.err ? `<em>${esc(A.err)}</em>` : '이 기기에만 저장 중'}</span><button class="btn sm primary" data-act="login">로그인</button>`;
+  else if (A.st === 'off') h = '<span class="acct-who">이 기기에만 저장 중</span>';
+  else h = `<span class="acct-who">${A.err ? esc(A.err) : '계정 확인 중…'}</span>`;
+  return `<div class="acct" id="acct" role="status">${h}</div>`;
+}
+function paintAcct() { const el = document.getElementById('acct'); if (el) el.outerHTML = acctHTML(); }
+function mergePR(a, b) {   // 두 기록 합치기: 완료한 것은 모두 살리고, 시도 횟수는 적은 쪽
+  if (!b || typeof b !== 'object') return a;
+  const o = P0(), nw = (b.updatedAt || 0) > (a.updatedAt || 0) ? b : a;
+  o.read = Object.assign({}, b.read || {}, a.read || {});
+  o.abc = Object.assign({}, b.abc || {}, a.abc || {});
+  for (const x of [a.sent || {}, b.sent || {}]) for (const k in x) o.sent[k] = Math.min(o.sent[k] || Infinity, x[k]);
+  for (const f of ['word', 'ins']) for (const x of [a[f] || {}, b[f] || {}]) for (const k in x) o[f][k] = [...new Set([...(o[f][k] || []), ...x[k]])].sort((p, q) => p - q);
+  o.tab = nw.tab || 3; o.last = nw.last || a.last || b.last || ''; o.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
+  return o;
+}
+function push() {
+  if (!A.uid || !A.ready || !A.db) return;
+  clearTimeout(A.t);
+  const uid = A.uid;
+  A.db.doc('drafts/' + uid).set({ [FIELD]: JSON.parse(JSON.stringify(PR)) }, { mergeFields: [FIELD] })
+    .then(() => { if (A.uid === uid) { A.saved = Date.now(); A.err = ''; paintAcct(); } })
+    .catch(e => { console.warn('study save', e); if (A.uid !== uid) return; A.err = '계정 저장 실패 · 다시 시도 중'; paintAcct(); A.t = setTimeout(push, 8000); });
+}
+const loginErr = e => e && e.code === 'auth/unauthorized-domain' ? '이 주소는 아직 로그인이 허용되지 않았어요' : '로그인하지 못했어요. 다시 시도해 주세요.';
+async function login() {
+  if (!window.firebase || !firebase.auth) { toast('로그인 기능을 불러오지 못했어요. 새로고침해 주세요.'); return; }
+  const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' });
+  try { await firebase.auth().signInWithPopup(p); }
+  catch (e) {
+    const c = e && e.code;
+    if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment') { try { await firebase.auth().signInWithRedirect(p); return; } catch (x) { /* 아래 안내 */ } }
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+    console.warn('login', e); A.err = loginErr(e); toast(A.err);
+  }
+}
+async function onUser(u) {
+  clearTimeout(A.t); A.ready = false; A.saved = 0; A.err = '';
+  if (!u) { A.uid = null; A.email = ''; A.nick = ''; A.st = 'out'; PR = loadLocal(null); render(); return; }
+  A.uid = u.uid; A.email = u.email || ''; A.st = 'sync'; paintAcct();
+  let remote = null;
+  try {
+    const [d, sb] = await Promise.all([A.db.doc('drafts/' + u.uid).get(), A.db.doc('subs/' + u.uid).get().catch(() => null)]);
+    remote = d.exists ? (d.data() || {})[FIELD] || null : null;
+    A.nick = sb && sb.exists ? (sb.data().nick || '') : '';
+  } catch (e) {   // 계정 기록을 못 읽었을 때는 덮어쓰지 않도록 저장을 멈추고 다시 시도
+    console.warn('study load', e); if (A.uid !== u.uid) return;
+    A.err = '계정 기록을 불러오는 중…'; paintAcct(); setTimeout(() => { if (A.uid === u.uid && !A.ready) onUser(u); }, 5000); return;
+  }
+  if (A.uid !== u.uid) return;
+  PR = mergePR(mergePR(loadLocal(u.uid), loadLocal(null)), remote);
+  try { localStorage.removeItem(lsKey(null)); } catch (e) { /* 무시 */ }
+  A.st = 'in'; A.ready = true; save(); render();
+}
+function loadScript(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+async function initAccount() {
+  const cfg = window.FIREBASE_CONFIG;
+  if (!cfg) { A.st = 'off'; paintAcct(); return; }
+  try {
+    for (const m of ['app', 'auth', 'firestore']) if (!(window.firebase && (m === 'app' || firebase[m]))) await loadScript(`https://www.gstatic.com/firebasejs/10.12.2/firebase-${m}-compat.js`);
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    A.db = firebase.firestore(); A.db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+    firebase.auth().getRedirectResult().catch(e => { A.err = loginErr(e); paintAcct(); });
+    firebase.auth().onAuthStateChanged(onUser);
+  } catch (e) { console.warn('firebase', e); A.st = 'off'; paintAcct(); }
+}
+window.addEventListener('pagehide', () => { if (A.uid && A.ready) push(); });
+
 window.addEventListener('hashchange', route);
 route();
+initAccount();
 })();
